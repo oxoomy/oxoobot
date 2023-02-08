@@ -1,0 +1,53 @@
+const lib = require('lib')({token: process.env.STDLIB_SECRET_TOKEN});
+
+let members;
+try { 
+  members = await lib.discord.guilds['@0.2.3'].members.list({
+    guild_id: `${context.params.event.guild_id}`,
+    limit: 1000
+  });
+} catch (e) {
+  await lib.discord.channels['@0.3.1'].messages.create({
+    channel_id: `${context.params.event.channel_id}`,
+    content: [
+      `Ah, j'peux pas voir le nombre de personnes sur ton serveur !`,
+      `J'ai besoin des perms administrateur afin de fonctionner correctement :x`,
+      '',
+      `Pour plus d'information, merci de contacter oxoomy sur le serveur.`,
+      'oxoomy'
+    ].join('\n')
+  });
+  throw e;
+}
+
+let memberCountText = members.length < 1000 ? members.length : 'over 1000';
+
+let messageResponse = await lib.discord.channels['@0.3.1'].messages.create({
+  channel_id: `${context.params.event.channel_id}`,
+  content: [
+    `Salut <@!${context.params.event.member.user.id}>! Je suis oxoobot`,
+    `Selon mes dernières informations, il y a **${memberCountText}** membres et autres bots sur ton serveur.`
+  ].join('\n'),
+  embed: {
+    title: 'oxoobot',
+    type: 'rich',
+    color: 0x0000AA, // Blue color
+    description: 'Je suis en développement, donc certaines commandes vont être modifiées',
+    fields: [{
+      name: 'En cas de soucis',
+      value: [
+        'Allez voir le serveur officiel de oxoomy, je vous répondrais en cas de problème :)',
+        'https://discord.gg/uqEdqEh6Yx'
+      ].join('\n')
+    }, {
+      name: 'Une proposition?',
+      value: [
+        'Je suis ouvert à toute proposition',
+        'Allez dans suggestions afin de proposer !'
+      ].join('\n')
+    }]
+  },
+  tts: false
+});
+
+return messageResponse;
